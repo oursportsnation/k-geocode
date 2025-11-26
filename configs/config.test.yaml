@@ -1,0 +1,24 @@
+# 테스트 환경 설정
+server:
+  port: 8081                 # 테스트용 다른 포트
+  
+# Provider 설정
+providers:
+  vworld:
+    enabled: false           # 테스트 환경에서는 비활성화
+    
+  kakao:
+    enabled: false           # 테스트 환경에서는 비활성화
+
+# 테스트용 Mock Provider 활성화
+test:
+  use_mock_provider: true
+
+# Redis 설정
+redis:
+  addr: localhost:6380       # 테스트용 다른 포트
+  
+# 로깅 설정
+logging:
+  level: warn                # 테스트 중에는 warn 이상만 출력
+  format: json

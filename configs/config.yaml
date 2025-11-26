@@ -1,0 +1,46 @@
+# 서버 설정
+server:
+  port: 8080
+  read_timeout: 15s
+  write_timeout: 15s
+  max_request_body_size: 1MB
+
+# Provider 설정
+providers:
+  vworld:
+    enabled: true
+    api_key: ${VWORLD_API_KEY}
+    daily_limit: 40000         # 일 40,000건
+    timeout: 5s
+    circuit_breaker:
+      failure_threshold: 5     # 5회 연속 실패 시 차단
+      success_threshold: 2     # HalfOpen에서 2회 성공 후 복구
+      timeout: 60s             # 60초 후 복구 시도
+
+  kakao:
+    enabled: true
+    api_key: ${KAKAO_API_KEY}
+    daily_limit: 100000        # 일 100,000건
+    timeout: 5s
+    circuit_breaker:
+      failure_threshold: 5
+      success_threshold: 2
+      timeout: 60s
+
+# Redis 설정 (Rate Limiting)
+redis:
+  addr: ${REDIS_ADDR}
+  password: ""
+  db: 0
+  timeout: 5s
+
+# 로깅 설정
+logging:
+  level: ${LOG_LEVEL}
+  format: json               # json or console
+  output: stdout
+
+# API 제한 설정
+api:
+  max_batch_size: 100        # 배치 최대 크기
+  request_timeout: 15s       # 전체 요청 타임아웃

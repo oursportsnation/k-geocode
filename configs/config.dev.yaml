@@ -1,0 +1,20 @@
+# 개발 환경 설정
+server:
+  port: 8080
+  read_timeout: 30s          # 개발 환경에서는 더 긴 타임아웃
+  write_timeout: 30s
+
+# Provider 설정
+providers:
+  vworld:
+    enabled: true
+    timeout: 10s             # 개발 환경에서는 더 긴 타임아웃
+    
+  kakao:
+    enabled: true
+    timeout: 10s
+
+# 로깅 설정
+logging:
+  level: debug               # 개발 환경에서는 debug 레벨
+  format: console            # 개발 환경에서는 읽기 쉬운 console 포맷

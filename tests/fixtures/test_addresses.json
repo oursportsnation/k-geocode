@@ -1,0 +1,44 @@
+{
+  "valid_addresses": [
+    {
+      "address": "서울특별시 강남구 테헤란로 152",
+      "expected": {
+        "latitude": 37.498095,
+        "longitude": 127.027610,
+        "road_address": "서울특별시 강남구 테헤란로 152",
+        "parcel_address": "서울특별시 강남구 역삼동 737",
+        "zipcode": "06236"
+      }
+    },
+    {
+      "address": "경기도 성남시 분당구 판교역로 166",
+      "expected": {
+        "latitude": 37.394776,
+        "longitude": 127.111160,
+        "road_address": "경기도 성남시 분당구 판교역로 166",
+        "parcel_address": "경기도 성남시 분당구 삼평동 681"
+      }
+    },
+    {
+      "address": "서울시 종로구 세종대로 175",
+      "expected": {
+        "latitude": 37.571997,
+        "longitude": 126.976867,
+        "road_address": "서울특별시 종로구 세종대로 175",
+        "parcel_address": "서울특별시 종로구 세종로 1"
+      }
+    }
+  ],
+  "invalid_addresses": [
+    "",
+    "   ",
+    "존재하지않는주소123456",
+    "InvalidAddress@#$%",
+    "서울특별시"
+  ],
+  "ambiguous_addresses": [
+    "강남구청",
+    "테헤란로",
+    "서울역"
+  ]
+}
