@@ -17,6 +17,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -122,7 +123,18 @@ func (s *GeocodingService) Geocode(ctx context.Context, address string, addressT
 					Error:    err.Error(),
 				})
 
-				// 폴백 불가능한 에러는 즉시 반환
+				// 인증 실패 시 Provider 비활성화 후 폴백
+				if ce.Type == provider.ErrorTypeUnauthorized {
+					p.Disable(fmt.Sprintf("Authentication failed: %s", err.Error()))
+					s.logger.Error("Provider disabled due to authentication failure",
+						zap.String("provider", p.Name()),
+						zap.String("reason", err.Error()),
+					)
+					// 다음 Provider로 폴백
+					continue
+				}
+
+				// 기타 폴백 불가능한 에러는 즉시 반환
 				if !ce.Fallback {
 					return &model.GeocodingResponse{
 						Success:        false,

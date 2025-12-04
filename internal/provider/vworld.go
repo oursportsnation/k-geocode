@@ -22,19 +22,23 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	
+	"sync"
+
 	"github.com/oursportsnation/k-geocode/internal/model"
 	"github.com/oursportsnation/k-geocode/pkg/httpclient"
-	
+
 	"go.uber.org/zap"
 )
 
 // VWorldProvider vWorld API 클라이언트
 type VWorldProvider struct {
-	apiKey     string
-	httpClient *httpclient.Client
-	baseURL    string
-	logger     *zap.Logger
+	apiKey        string
+	httpClient    *httpclient.Client
+	baseURL       string
+	logger        *zap.Logger
+	disabled      bool
+	disableReason string
+	mu            sync.RWMutex
 }
 
 // VWorldResponse vWorld API 응답 구조체
@@ -94,9 +98,34 @@ func (v *VWorldProvider) Name() string {
 }
 
 func (v *VWorldProvider) IsAvailable(ctx context.Context) bool {
-	// 기본적으로 사용 가능
-	// 추후 Circuit Breaker 통합 시 상태 확인 추가
-	return true
+	v.mu.RLock()
+	defer v.mu.RUnlock()
+	return !v.disabled
+}
+
+// Disable Provider를 비활성화
+func (v *VWorldProvider) Disable(reason string) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.disabled = true
+	v.disableReason = reason
+	v.logger.Warn("vWorld provider disabled",
+		zap.String("reason", reason),
+	)
+}
+
+// IsDisabled Provider가 비활성화 되었는지 확인
+func (v *VWorldProvider) IsDisabled() bool {
+	v.mu.RLock()
+	defer v.mu.RUnlock()
+	return v.disabled
+}
+
+// GetDisableReason 비활성화 사유 반환
+func (v *VWorldProvider) GetDisableReason() string {
+	v.mu.RLock()
+	defer v.mu.RUnlock()
+	return v.disableReason
 }
 
 func (v *VWorldProvider) Geocode(ctx context.Context, address string) (*model.ProviderResult, error) {

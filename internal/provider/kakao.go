@@ -22,19 +22,23 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	
+	"sync"
+
 	"github.com/oursportsnation/k-geocode/internal/model"
 	"github.com/oursportsnation/k-geocode/pkg/httpclient"
-	
+
 	"go.uber.org/zap"
 )
 
 // KakaoProvider Kakao Local API 클라이언트
 type KakaoProvider struct {
-	apiKey     string
-	httpClient *httpclient.Client
-	baseURL    string
-	logger     *zap.Logger
+	apiKey        string
+	httpClient    *httpclient.Client
+	baseURL       string
+	logger        *zap.Logger
+	disabled      bool
+	disableReason string
+	mu            sync.RWMutex
 }
 
 // KakaoResponse Kakao API 응답 구조체
@@ -97,9 +101,34 @@ func (k *KakaoProvider) Name() string {
 }
 
 func (k *KakaoProvider) IsAvailable(ctx context.Context) bool {
-	// 기본적으로 사용 가능
-	// 추후 Circuit Breaker 통합 시 상태 확인 추가
-	return true
+	k.mu.RLock()
+	defer k.mu.RUnlock()
+	return !k.disabled
+}
+
+// Disable Provider를 비활성화
+func (k *KakaoProvider) Disable(reason string) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	k.disabled = true
+	k.disableReason = reason
+	k.logger.Warn("Kakao provider disabled",
+		zap.String("reason", reason),
+	)
+}
+
+// IsDisabled Provider가 비활성화 되었는지 확인
+func (k *KakaoProvider) IsDisabled() bool {
+	k.mu.RLock()
+	defer k.mu.RUnlock()
+	return k.disabled
+}
+
+// GetDisableReason 비활성화 사유 반환
+func (k *KakaoProvider) GetDisableReason() string {
+	k.mu.RLock()
+	defer k.mu.RUnlock()
+	return k.disableReason
 }
 
 func (k *KakaoProvider) Geocode(ctx context.Context, address string) (*model.ProviderResult, error) {

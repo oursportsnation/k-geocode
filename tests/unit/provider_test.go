@@ -10,10 +10,12 @@ import (
 
 // MockProvider 테스트용 Mock Provider
 type MockProvider struct {
-	name      string
-	success   bool
-	available bool
-	result    *model.ProviderResult
+	name          string
+	success       bool
+	available     bool
+	result        *model.ProviderResult
+	disabled      bool
+	disableReason string
 }
 
 func (m *MockProvider) Name() string {
@@ -21,14 +23,27 @@ func (m *MockProvider) Name() string {
 }
 
 func (m *MockProvider) IsAvailable(ctx context.Context) bool {
-	return m.available
+	return m.available && !m.disabled
+}
+
+func (m *MockProvider) Disable(reason string) {
+	m.disabled = true
+	m.disableReason = reason
+}
+
+func (m *MockProvider) IsDisabled() bool {
+	return m.disabled
+}
+
+func (m *MockProvider) GetDisableReason() string {
+	return m.disableReason
 }
 
 func (m *MockProvider) Geocode(ctx context.Context, address string) (*model.ProviderResult, error) {
 	if m.result != nil {
 		return m.result, nil
 	}
-	
+
 	if m.success {
 		return &model.ProviderResult{
 			Coordinate: model.Coordinate{
@@ -43,7 +58,7 @@ func (m *MockProvider) Geocode(ctx context.Context, address string) (*model.Prov
 			Success: true,
 		}, nil
 	}
-	
+
 	return &model.ProviderResult{
 		Success: false,
 		Error:   provider.ErrAddressNotFound,
