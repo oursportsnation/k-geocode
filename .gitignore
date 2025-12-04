@@ -70,3 +70,5 @@ dump.rdb
 # Internal development documents (keep locally, don't push)
 docs/*.old
 docs/*.md
+
+.history/
