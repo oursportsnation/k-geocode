@@ -24,14 +24,16 @@ import (
 	"github.com/oursportsnation/k-geocode/pkg/logger"
 )
 
-// Client k-geocode 클라이언트
+// Client is the k-geocode geocoding client that provides unified access
+// to multiple Korean geocoding providers with automatic fallback.
 type Client struct {
 	service   *service.GeocodingService
 	providers []provider.GeocodingProvider
 	config    Config
 }
 
-// New 새로운 지오코딩 클라이언트를 생성합니다
+// New creates a new geocoding client with the given configuration.
+// At least one API key (VWorldAPIKey or KakaoAPIKey) must be provided.
 func New(cfg Config) (*Client, error) {
 	// 설정 검증
 	if err := cfg.Validate(); err != nil {
@@ -79,17 +81,19 @@ func New(cfg Config) (*Client, error) {
 	}, nil
 }
 
-// Geocode 주소를 WGS84 좌표로 변환합니다
-//
-// 자동 폴백: vWorld → Kakao 순서로 시도하며, ROAD → PARCEL 타입도 자동으로 시도합니다.
+// Geocode converts a Korean address to WGS84 coordinates.
+// It automatically falls back through providers (vWorld → Kakao) and
+// address types (ROAD → PARCEL) until a result is found.
 func (c *Client) Geocode(ctx context.Context, address string) (*Result, error) {
 	return c.GeocodeWithType(ctx, address, "")
 }
 
-// GeocodeWithType 특정 주소 타입으로 지오코딩을 수행합니다
+// GeocodeWithType converts a Korean address to WGS84 coordinates
+// using the specified address type.
 //
-// addressType: AddressTypeRoad (도로명) 또는 AddressTypeParcel (지번)
-// 빈 문자열("")을 전달하면 자동으로 ROAD → PARCEL 순서로 폴백합니다.
+// Use [AddressTypeRoad] for road-based addresses (도로명) or
+// [AddressTypeParcel] for parcel-based addresses (지번).
+// Pass an empty string to automatically try ROAD then PARCEL.
 func (c *Client) GeocodeWithType(ctx context.Context, address string, addressType AddressType) (*Result, error) {
 	resp, err := c.service.Geocode(ctx, address, string(addressType))
 	if err != nil {
@@ -129,9 +133,9 @@ func (c *Client) GeocodeWithType(ctx context.Context, address string, addressTyp
 	return result, nil
 }
 
-// GeocodeBatch 여러 주소를 한 번에 변환합니다 (최대 100개)
-//
-// 최대 10개씩 동시에 처리되며, 일부 실패해도 성공한 결과는 반환됩니다.
+// GeocodeBatch converts multiple addresses concurrently (max 100).
+// Up to 10 addresses are processed in parallel.
+// Partial failures are allowed; successful results are returned alongside nil entries for failures.
 func (c *Client) GeocodeBatch(ctx context.Context, addresses []string) ([]*Result, error) {
 	if len(addresses) == 0 {
 		return []*Result{}, nil
@@ -176,14 +180,14 @@ func (c *Client) GeocodeBatch(ctx context.Context, addresses []string) ([]*Resul
 	return results, nil
 }
 
-// Close 클라이언트를 종료하고 리소스를 정리합니다
+// Close releases any resources held by the client.
 func (c *Client) Close() error {
 	// 현재는 정리할 리소스 없음
 	// 향후 Connection Pool 등이 추가되면 여기서 정리
 	return nil
 }
 
-// IsAvailable 지오코딩 서비스가 사용 가능한지 확인합니다
+// IsAvailable returns true if at least one geocoding provider is available.
 func (c *Client) IsAvailable(ctx context.Context) bool {
 	for _, p := range c.providers {
 		if p.IsAvailable(ctx) {
@@ -193,7 +197,7 @@ func (c *Client) IsAvailable(ctx context.Context) bool {
 	return false
 }
 
-// GetProviders 사용 가능한 Provider 목록을 반환합니다
+// GetProviders returns the list of configured provider names.
 func (c *Client) GetProviders() []string {
 	names := make([]string, 0, len(c.providers))
 	for _, p := range c.providers {

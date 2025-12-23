@@ -1,6 +1,10 @@
 # k-geocode
 
-한국 주소를 WGS84 좌표로 변환하는 하이브리드 지오코딩 라이브러리 및 서버입니다.
+[![Go Reference](https://pkg.go.dev/badge/github.com/oursportsnation/k-geocode.svg)](https://pkg.go.dev/github.com/oursportsnation/k-geocode)
+[![Go Report Card](https://goreportcard.com/badge/github.com/oursportsnation/k-geocode)](https://goreportcard.com/report/github.com/oursportsnation/k-geocode)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+한국 주소를 WGS84 좌표로 변환하는 하이브리드 지오코딩 Go 패키지입니다.
 
 ## ✨ 주요 특징
 
@@ -12,7 +16,13 @@
 - 🔍 **투명한 디버깅**: 모든 Provider 시도 내역 추적
 - 📊 **모니터링**: 구조화된 로깅 및 헬스체크
 - 📚 **Swagger UI**: 대화형 API 문서 (`/swagger/index.html`)
-- 🧪 **테스트**: 35개 단위 테스트 (100% 통과)
+- 🧪 **테스트**: 85개+ 단위 테스트 (46.8% 커버리지)
+
+## 📦 설치
+
+```bash
+go get github.com/oursportsnation/k-geocode
+```
 
 ## 🚀 빠른 시작
 
@@ -22,33 +32,7 @@
 - vWorld API 키 ([발급 링크](https://www.vworld.kr/dev/v4dv_apiDevice2_s001.do))
 - Kakao REST API 키 ([발급 링크](https://developers.kakao.com/))
 
-### 사용 방법
-
-이 프로젝트는 **두 가지 방식**으로 사용할 수 있습니다:
-
-#### 방법 1: 독립 서버로 실행
-
-```bash
-# 1. 저장소 클론
-git clone <repository-url>
-cd geocoding-service
-
-# 2. 의존성 설치
-go mod download
-
-# 3. 환경 설정
-cp .env.example .env
-# .env 파일을 열어 API 키 입력
-
-# 4. 서버 실행
-make run
-```
-
-서버가 `http://localhost:8080` 에서 실행됩니다.
-
-#### 방법 2: Go 모듈로 사용 (권장)
-
-기존 API 프로젝트에 모듈로 통합하여 사용할 수 있습니다.
+### Go 패키지로 사용 (권장)
 
 ```go
 package main
@@ -82,6 +66,28 @@ func main() {
 ```
 
 더 많은 예제는 **[examples/basic](./examples/basic)**를 참고하세요.
+
+### 독립 서버로 실행
+
+REST API 서버로 실행할 수도 있습니다:
+
+```bash
+# 1. 저장소 클론
+git clone <repository-url>
+cd geocoding-service
+
+# 2. 의존성 설치
+go mod download
+
+# 3. 환경 설정
+cp .env.example .env
+# .env 파일을 열어 API 키 입력
+
+# 4. 서버 실행
+make run
+```
+
+서버가 `http://localhost:8080` 에서 실행됩니다.
 
 ## 📖 API 사용법
 
@@ -204,12 +210,26 @@ curl http://localhost:8080/ready
 # 단위 테스트 실행
 make test
 
+# 테스트 커버리지
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+
 # 통합 테스트 실행
 ./tests/integration/api_test.sh
-
-# 테스트 커버리지
-go test -cover ./...
 ```
+
+### 커버리지 현황
+
+| 패키지 | 커버리지 |
+|--------|----------|
+| internal/utils | 100.0% |
+| pkg/httpclient | 100.0% |
+| internal/middleware | 96.6% |
+| pkg/logger | 95.5% |
+| internal/handler | 94.9% |
+| (root) geocoding | 70.9% |
+| internal/service | 64.2% |
+| **전체** | **46.8%** |
 
 ## 📚 문서
 
@@ -295,20 +315,21 @@ providers:
 
 ## 📊 현재 상태
 
-**Phase 1 완료** (2025-11-25)
+**v0.1.0** (2025-12-23)
 
 - ✅ 핵심 기능 구현
-- ✅ 단위 테스트 35개 (100% 통과)
-- ✅ 통합 테스트 16개 (81% 통과)
+- ✅ 단위 테스트 85개+ (46.8% 커버리지)
+- ✅ 통합 테스트 16개
 - ✅ 폴백 메커니즘 검증
 - ✅ 배치 처리 구현
 - ✅ Swagger/OpenAPI 문서화
 - ✅ Provider 시도 내역 추적
 - ✅ 주소 타입 지정 기능 (ROAD/PARCEL)
 - ✅ vWorld API 버그 수정
-- ✅ **모듈화 완료** - Go 프로젝트에서 라이브러리로 사용 가능
+- ✅ **Go 패키지** - `go get`으로 설치 가능
+- ✅ godoc 스타일 문서화
 
-**계획 중 (Phase 2)**
+**계획 중**
 
 - ⏳ Circuit Breaker 구현
 - ⏳ Redis 캐싱
@@ -331,5 +352,5 @@ Apache License 2.0
 
 ---
 
-**최종 업데이트**: 2025-11-25
-**버전**: Phase 1 (v1.1.0)
+**최종 업데이트**: 2025-12-23
+**버전**: v0.1.0

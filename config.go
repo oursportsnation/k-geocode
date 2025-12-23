@@ -19,32 +19,32 @@ import (
 	"time"
 )
 
-// Config k-geocode 클라이언트 설정
+// Config holds the configuration for the geocoding client.
 type Config struct {
-	// VWorldAPIKey vWorld API 키
-	// https://www.vworld.kr 에서 발급
+	// VWorldAPIKey is the API key for vWorld geocoding service.
+	// Obtain from https://www.vworld.kr
 	VWorldAPIKey string
 
-	// KakaoAPIKey Kakao REST API 키
-	// https://developers.kakao.com 에서 발급
+	// KakaoAPIKey is the REST API key for Kakao geocoding service.
+	// Obtain from https://developers.kakao.com
 	KakaoAPIKey string
 
-	// Timeout HTTP 요청 타임아웃 (기본: 5초)
+	// Timeout is the HTTP request timeout. Default: 5 seconds.
 	Timeout time.Duration
 
-	// MaxRetries 재시도 횟수 (기본: 2)
-	// 현재는 사용되지 않지만 향후 확장 예정
+	// MaxRetries is the number of retry attempts. Default: 2.
+	// Reserved for future use.
 	MaxRetries int
 
-	// LogLevel 로그 레벨 (기본: "info")
-	// 옵션: "debug", "info", "warn", "error"
+	// LogLevel sets the logging verbosity. Default: "info".
+	// Valid values: "debug", "info", "warn", "error".
 	LogLevel string
 
-	// ConcurrentLimit 배치 처리 시 동시 실행 제한 (기본: 10)
+	// ConcurrentLimit is the maximum concurrent requests for batch operations. Default: 10.
 	ConcurrentLimit int
 }
 
-// DefaultConfig 기본 설정을 반환합니다
+// DefaultConfig returns a Config with sensible default values.
 func DefaultConfig() Config {
 	return Config{
 		Timeout:         5 * time.Second,
@@ -54,7 +54,8 @@ func DefaultConfig() Config {
 	}
 }
 
-// Validate 설정값을 검증합니다
+// Validate checks that the configuration is valid.
+// It returns an error if required fields are missing or values are out of range.
 func (c *Config) Validate() error {
 	// 최소 하나의 API 키는 필수
 	if c.VWorldAPIKey == "" && c.KakaoAPIKey == "" {
@@ -94,7 +95,7 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// SetDefaults 기본값을 설정합니다 (0값인 필드만)
+// SetDefaults applies default values to zero-valued fields.
 func (c *Config) SetDefaults() {
 	if c.Timeout == 0 {
 		c.Timeout = 5 * time.Second

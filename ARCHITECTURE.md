@@ -6,45 +6,48 @@
 
 ## 아키텍처 다이어그램
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      HTTP Client                         │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│                    Gin Router                            │
-│  • RequestID Middleware                                  │
-│  • Logger Middleware                                     │
-│  • Recovery Middleware                                   │
-│  • CORS Middleware                                       │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Handlers                               │
-│  • GeocodingHandler (단건/대량 지오코딩)                │
-│  • HealthHandler (헬스체크)                              │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│               GeocodingService                           │
-│  • 입력 검증 (주소 정규화, 유효성 검사)                  │
-│  • Provider 폴백 로직                                    │
-│  • 배치 처리 (동시성 제어)                               │
-│  • 좌표 정규화 (소수점 6자리)                            │
-└────────────────────┬────────────────────────────────────┘
-                     │
-        ┌────────────┴────────────┐
-        ▼                         ▼
-┌──────────────┐          ┌──────────────┐
-│   vWorld     │          │    Kakao     │
-│   Provider   │          │   Provider   │
-│              │          │              │
-│ • 도로명주소 │          │ • 유사검색   │
-│ • 지번주소   │          │ • REST API   │
-└──────────────┘          └──────────────┘
+```mermaid
+flowchart TD
+    subgraph Client
+        C[HTTP Client]
+    end
+
+    subgraph HTTP["Gin Router"]
+        R1[RequestID Middleware]
+        R2[Logger Middleware]
+        R3[Recovery Middleware]
+        R4[CORS Middleware]
+    end
+
+    subgraph Handlers
+        H1["GeocodingHandler (단건/대량 지오코딩)"]
+        H2["HealthHandler (헬스체크)"]
+    end
+
+    subgraph Service["GeocodingService"]
+        S1["입력 검증 (주소 정규화, 유효성 검사)"]
+        S2["Provider 폴백 로직"]
+        S3["배치 처리 (동시성 제어)"]
+        S4["좌표 정규화 (소수점 6자리)"]
+    end
+
+    subgraph Providers
+        subgraph VWorld["vWorld Provider"]
+            V1[도로명주소]
+            V2[지번주소]
+        end
+
+        subgraph Kakao["Kakao Provider"]
+            K1[유사검색]
+            K2[REST API]
+        end
+    end
+
+    C --> HTTP
+    HTTP --> Handlers
+    Handlers --> Service
+    Service --> VWorld
+    Service --> Kakao
 ```
 
 ## 레이어 구조
@@ -411,4 +414,3 @@ server.Shutdown(ctx)
 ---
 
 **작성일**: 2025-11-24
-**버전**: Phase 1 완료

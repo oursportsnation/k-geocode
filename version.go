@@ -14,5 +14,5 @@
 
 package geocoding
 
-// Version k-geocode 라이브러리 버전
+// Version is the current version of the k-geocode library.
 const Version = "0.1.0"
