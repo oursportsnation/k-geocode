@@ -17,6 +17,7 @@ package geocoding
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/oursportsnation/k-geocode/internal/provider"
 	"github.com/oursportsnation/k-geocode/internal/service"
@@ -55,10 +56,18 @@ func New(cfg Config) (*Client, error) {
 	// Provider들 초기화
 	var providers []provider.GeocodingProvider
 
-	// vWorld Provider
+	// vWorld Provider(s) - 콤마로 구분된 여러 키 지원
 	if cfg.VWorldAPIKey != "" {
-		vworldProvider := provider.NewVWorldProvider(cfg.VWorldAPIKey, httpClient, log)
-		providers = append(providers, vworldProvider)
+		vworldKeys := strings.Split(cfg.VWorldAPIKey, ",")
+		for i, key := range vworldKeys {
+			key = strings.TrimSpace(key)
+			if key == "" {
+				continue
+			}
+			vworldProvider := provider.NewVWorldProvider(key, httpClient, log)
+			providers = append(providers, vworldProvider)
+			log.Info(fmt.Sprintf("vWorld provider #%d registered", i+1))
+		}
 	}
 
 	// Kakao Provider

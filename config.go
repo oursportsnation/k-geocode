@@ -21,7 +21,9 @@ import (
 
 // Config holds the configuration for the geocoding client.
 type Config struct {
-	// VWorldAPIKey is the API key for vWorld geocoding service.
+	// VWorldAPIKey is the API key(s) for vWorld geocoding service.
+	// Supports multiple keys separated by comma for quota rotation.
+	// Example: "key1,key2,key3"
 	// Obtain from https://www.vworld.kr
 	VWorldAPIKey string
 
