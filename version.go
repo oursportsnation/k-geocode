@@ -15,4 +15,4 @@
 package geocoding
 
 // Version is the current version of the k-geocode library.
-const Version = "0.1.0"
+const Version = "0.1.2"

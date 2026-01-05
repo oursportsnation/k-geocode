@@ -123,14 +123,21 @@ func (s *GeocodingService) Geocode(ctx context.Context, address string, addressT
 					Error:    err.Error(),
 				})
 
-				// 인증 실패 시 Provider 비활성화 후 폴백
+				// 인증 실패 또는 한도 초과 시 Provider 비활성화 후 폴백
 				if ce.Type == provider.ErrorTypeUnauthorized {
 					p.Disable(fmt.Sprintf("Authentication failed: %s", err.Error()))
 					s.logger.Error("Provider disabled due to authentication failure",
 						zap.String("provider", p.Name()),
 						zap.String("reason", err.Error()),
 					)
-					// 다음 Provider로 폴백
+					continue
+				}
+				if ce.Type == provider.ErrorTypeRateLimitExceeded {
+					p.Disable(fmt.Sprintf("Rate limit exceeded: %s", err.Error()))
+					s.logger.Warn("Provider disabled due to rate limit",
+						zap.String("provider", p.Name()),
+						zap.String("reason", err.Error()),
+					)
 					continue
 				}
 
